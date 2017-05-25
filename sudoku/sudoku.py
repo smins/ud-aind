@@ -19,6 +19,9 @@ def grid_values(grid):
     boxes = cross(rows, cols)
 
     for index, boxval in enumerate(grid):
+        # Convert empty boxes from . to all possible vals
+        if boxval == '.':
+            boxval = '123456789'
         grid_dict[boxes[index]] = boxval
 
     return grid_dict
