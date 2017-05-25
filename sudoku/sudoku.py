@@ -11,17 +11,17 @@ def cross(a, b):
     return [s+t for s in a for t in b]
 
 # Returns a dictionary representation of the sudoku puzzle
-def grid_values(puzzle_str):
+def grid_values(grid):
     rows = 'ABCDEFGHI'
     cols = '123456789'
 
-    puzzle_dict = dict()
+    grid_dict = dict()
     boxes = cross(rows, cols)
 
-    for index, boxval in enumerate(puzzle_str):
-        puzzle_dict[boxes[index]] = boxval
+    for index, boxval in enumerate(grid):
+        grid_dict[boxes[index]] = boxval
 
-    return puzzle_dict
+    return grid_dict
 
 # Global vars - labels for the board
 g_rows = 'ABCDEFGHI'
