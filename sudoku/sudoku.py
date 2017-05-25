@@ -12,9 +12,12 @@ def cross(a, b):
 
 # Returns a dictionary representation of the sudoku puzzle
 def grid_values(puzzle_str):
+    rows = 'ABCDEFGHI'
+    cols = '123456789'
+
     puzzle_dict = dict()
-    boxes = cross(g_rows, g_cols)
-    # Puzzle_str must be the same size as boxes
+    boxes = cross(rows, cols)
+
     for index, boxval in enumerate(puzzle_str):
         puzzle_dict[boxes[index]] = boxval
 
