@@ -27,16 +27,16 @@ def grid_values(grid):
     return grid_dict
 
 # If a box contains a single value, remove that value from all peers
-def eliminate(grid):
+def eliminate(values):
 
     rows = 'ABCDEFGHI'
     cols = '123456789'
 
     # Generate all the needed lists
-    boxes = cross(row, cols)
+    boxes = cross(rows, cols)
     # Unit lists
     row_units = [cross(row, cols) for row in rows]
-    col_units = [cross(col, rows) for col in cols]
+    col_units = [cross(rows, col) for col in cols]
     square_units = [cross(rs, cs) for rs in ('ABC', 'DEF', 'GHI') for cs in ('123', '456', '789')]
     # Combine the units into a master list
     unitlist = row_units + col_units + square_units
@@ -45,14 +45,14 @@ def eliminate(grid):
     peers = dict((s, set(sum(units[s], []))-set([s])) for s in boxes)
 
     # Get the list of all boxes with only 1 possible values
-    solved_vals = [box for box in grid.keys() if len(grid[box]) == 1]
+    solved_values = [box for box in values.keys() if len(values[box]) == 1]
     for box in solved_values:
         # Grab the digit of each box
         digit = values[box]
         for peer in peers[box]:
-            grid[peer] = grid[peer].replace(digit,'')
+            values[peer] = values[peer].replace(digit,'')
 
-    return grid
+    return values
 
 ### Script Below ###
 rows = 'ABCDEFGHI'
@@ -62,3 +62,4 @@ cols = '123456789'
 boxes = cross(rows, cols)
 
 print(grid_values('..0..2.1.2.2..234..21.23.2'))
+print(eliminate(grid_values('..0..2.1.2.2..234..21.23.2')))
