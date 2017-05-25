@@ -54,6 +54,30 @@ def eliminate(values):
 
     return values
 
+def only_choice(values):
+    rows = 'ABCDEFGHI'
+    cols = '123456789'
+
+    # Generate all the needed lists
+    boxes = cross(rows, cols)
+    # Unit lists
+    row_units = [cross(row, cols) for row in rows]
+    col_units = [cross(rows, col) for col in cols]
+    square_units = [cross(rs, cs) for rs in ('ABC', 'DEF', 'GHI') for cs in ('123', '456', '789')]
+    # Combine the units into a master list
+    unitlist = row_units + col_units + square_units
+
+    # Loop through all units
+    for unit in unitlist:
+        # Loop through each digit, generating a list of boxes containing it
+        for digit in '123456789':
+            digit_boxes = [box for box in unit if digit in values[box]]
+            if len(digit_boxes) == 1:
+                # Only 1 box contains this digit, so assign it that value
+                values[digit_boxes[0]] = digit
+
+    return values
+    
 ### Script Below ###
 rows = 'ABCDEFGHI'
 cols = '123456789'
@@ -62,4 +86,3 @@ cols = '123456789'
 boxes = cross(rows, cols)
 
 print(grid_values('..0..2.1.2.2..234..21.23.2'))
-print(eliminate(grid_values('..0..2.1.2.2..234..21.23.2')))
