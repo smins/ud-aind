@@ -1,2 +1,2 @@
 # ud-aind
-Udacity Artificial Intelligence Nanodegree
+Udacity Artificial Intelligence Nanodegree Scratchbook
