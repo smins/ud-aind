@@ -20,14 +20,14 @@ column_units = [cross(rows, c) for c in cols]
 square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')]
 
 # Diagonal Units
+# Two brackets to enable list concats
 # A1 -> I9
-ldiag_unit = [z[0]+z[1] for z in zip(rows, cols)] 
+ldiag_unit = [[z[0]+z[1] for z in zip(rows, cols)]]
 # A9 -> I1
-rdiag_unit = [z[0]+z[1] for z in zip(rows, reversed(cols))]
+rdiag_unit = [[z[0]+z[1] for z in zip(rows, reversed(cols))]]
 
-# TODO: Add diag support
 # List of all units
-unitlist = row_units + column_units + square_units # + topleftdiag_unit + trdiag_unit
+unitlist = row_units + column_units + square_units + ldiag_unit + rdiag_unit
 
 # Dictionaries keyed by box tag: units containing a box & peers of a box
 units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
