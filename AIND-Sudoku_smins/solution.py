@@ -25,6 +25,7 @@ ldiag_unit = [z[0]+z[1] for z in zip(rows, cols)]
 # A9 -> I1
 rdiag_unit = [z[0]+z[1] for z in zip(rows, reversed(cols))]
 
+# TODO: Add diag support
 # List of all units
 unitlist = row_units + column_units + square_units # + topleftdiag_unit + trdiag_unit
 
@@ -57,6 +58,7 @@ def naked_twins(values):
     Returns:
         the values dictionary with the naked twins eliminated from peers.
     """
+    # TODO: Implement
 
     # Find all instances of naked twins
     # Eliminate the naked twins as possibilities for their peers
@@ -143,6 +145,8 @@ def reduce_puzzle(values):
     If a puzzle stalls, return false. Otherwise, return the solved puzzle
     """
     
+    # TODO: Add Naked Twins after implementing
+    
     stalled = False
     while not stalled:
         # Check how many boxes have a determined value
@@ -217,7 +221,19 @@ def solve(grid):
     Returns:
         The dictionary representation of the final sudoku grid. False if no solution exists.
     """
-    return reduce_puzzle(grid_values(grid))
+    values = grid_values(grid)
+    
+    # Reduce the puzzle, then continue if it's solvable
+    values = reduce_puzzle(values)
+    if values:
+        # Perform depth-first search
+        search_result = search(values)
+        if search_result:
+            return search_result
+        # No solution exists
+        else:
+            return False
+        
 
 if __name__ == '__main__':
     diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
