@@ -175,7 +175,47 @@ def reduce_puzzle(values):
     return values
 
 def search(values):
-    pass
+    """
+    Implement a depth-first search approach to solve the board.
+    Apply reduce puzzle, then select the board with the fewest possibilities.
+    Follow this pattern recursively until a solved board is found, or no
+    more boards exist
+    """
+    
+    values = reduce_puzzle(values)
+    
+    # Puzzle has no solution
+    if values is False:
+        return False
+    
+    # puzzle is already solved
+    if all(len(values[s]) == 1 for s in boxes): 
+        return values
+    
+    # Begin solving the puzzle
+    # OOB assignment
+    fewest = -1
+    for box in values:
+        if (fewest == -1 or (len(values[box]) < len(fewest))):
+            # Don't consider solved boxes
+            if len(values[box]) == 1:
+                pass
+            else:
+                fewest = box
+
+    # We've selected a box with the min pos, solve recursively by placing
+    # a value in the space & attempting to solve
+    for value in values[fewest]:
+        trial_board = values.copy()
+        trial_board[fewest] = value
+        
+        # If we succeed, return the board!
+        attempt = search(trial_board)
+        if attempt:
+            return attempt
+        
+        
+        
 
 ### SOLVE ###
 #norm_grid = grid_values(norm_sudoku_grid)
@@ -184,8 +224,12 @@ def search(values):
 #print('*************************************************************')
 #display(reduce_puzzle(norm_grid))
 
-diag_grid = grid_values(diag_sudoku_grid)
+#diag_grid = grid_values(diag_sudoku_grid)
+#
+#display(diag_grid)
+#print('*************************************************************')
+#display(reduce_puzzle(diag_grid))
 
-display(diag_grid)
+dfs = search(grid_values(norm_sudoku_grid))
 print('*************************************************************')
-display(reduce_puzzle(diag_grid))
+display(dfs)
