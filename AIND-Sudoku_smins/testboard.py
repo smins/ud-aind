@@ -40,7 +40,7 @@ peers = dict((s, set(sum(units[s],[]))-set([s])) for s in boxes)
 
 
 ### TESTING ###
-#diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
+diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
 norm_sudoku_grid = '..3.2.6..9..3.5..1..18.64....81.29..7.......8..67.82....26.95..8..2.3..9..5.1.3..'
 
 # List to hold moves made on the board
@@ -178,14 +178,14 @@ def search(values):
     pass
 
 ### SOLVE ###
-#orig_normgrid = grid_values(norm_sudoku_grid) 
-norm_grid = grid_values(norm_sudoku_grid)
-
-display(norm_grid)
-print('*************************************************************')
-display(reduce_puzzle(norm_grid))
-#elim1_dg = eliminate(norm_grid)
-#display(elim1_dg)
+#norm_grid = grid_values(norm_sudoku_grid)
+#
+#display(norm_grid)
 #print('*************************************************************')
-#oc_dg = only_choice(elim1_dg)
-#display(oc_dg)
+#display(reduce_puzzle(norm_grid))
+
+diag_grid = grid_values(diag_sudoku_grid)
+
+display(diag_grid)
+print('*************************************************************')
+display(reduce_puzzle(diag_grid))
