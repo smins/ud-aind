@@ -56,12 +56,13 @@ def naked_twins(values):
     exactly 2 possible values, this is the naked twins. Remove those values
     from the other members of the unit.
     """
+    
     for unit in unitlist:
         # Get all boxes of length 2
-        twoboxes = []
+        twoboxes = {}
         for box in unit:
             if len(values[box]) == 2:
-                twoboxes.append[box]
+                twoboxes[box] = values[box]
             
         # Naked twins requires exactly two boxws
         if len(twoboxes) != 2:
@@ -69,9 +70,12 @@ def naked_twins(values):
         
         else:
             # Naked twins case!
-            if twoboxes[0] == twoboxes[1]:
+            twovals = list(twoboxes.values())
+            if twovals[0] == twovals[1]:
+                
+                # TODO: Need to remove the values from ALL OTHER boxes in the units
                 for box in unit:
-                    stripped = values[box].strip(twoboxes[0])
+                    stripped = values[box].strip(twovals[0])
                     assign_value(values, box, stripped)
             
             # The boxes were not twins
@@ -157,12 +161,10 @@ def only_choice(values):
 def reduce_puzzle(values):
     """
     While changes are still be applied (e.g. not stalled), iteratively 
-    run the elimination then only_choice strategies. 
+    run the elimination, naked_twins, and only_choice functions.
     
     If a puzzle stalls, return false. Otherwise, return the solved puzzle
     """
-    
-    # TODO: Add Naked Twins after implementing
     
     stalled = False
     while not stalled:
@@ -171,10 +173,13 @@ def reduce_puzzle(values):
         for box in values:
             if len(values[box]) == 1:
                 solved_before += 1
-        # Your code here: Use the Eliminate Strategy
+        # Use the Eliminate Strategy
         values = eliminate(values)
-        # Your code here: Use the Only Choice Strategy
+                # Use the Naked Twins Strategy
+        values = naked_twins(values)
+        # Use the Only Choice Strategy
         values = only_choice(values)
+
         # Check how many boxes have a determined value, to compare
         solved_after = 0
         for box in values:
