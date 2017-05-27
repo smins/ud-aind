@@ -111,13 +111,16 @@ def display(values):
         
 
 def eliminate(values):
-    # Get the list of all boxes with only 1 possible values
-    solved_values = [box for box in values.keys() if len(values[box]) == 1]
-    for box in solved_values:
-        # Grab the digit of each box
-        digit = values[box]
-        for peer in peers[box]:
-            values[peer] = values[peer].replace(digit,'')
+    """
+    Loop through all boxes - if a box has a value assigned, remove that 
+    value from all of its peers' possible values
+    """
+    for box in boxes:
+        if len(values[box]) == 1:
+            digit = values[box]
+            # Box has a placed value, so remove it from it's peers values
+            for peer in peers[box]:
+                values[peer] = values[peer].replace(digit,'')
 
     return values
 
@@ -149,16 +152,23 @@ def reduce_puzzle(values):
     stalled = False
     while not stalled:
         # Check how many boxes have a determined value
-        solved_values_before = len([box for box in values.keys() if len(values[box]) == 1])
-
+        solved_before = 0
+        for box in values:
+            if len(values[box]) == 1:
+                solved_before += 1
         # Your code here: Use the Eliminate Strategy
         values = eliminate(values)
         # Your code here: Use the Only Choice Strategy
         values = only_choice(values)
         # Check how many boxes have a determined value, to compare
-        solved_values_after = len([box for box in values.keys() if len(values[box]) == 1])
-        # If no new values were added, stop the loop.
-        stalled = solved_values_before == solved_values_after
+        solved_after = 0
+        for box in values:
+            if len(values[box]) == 1:
+                solved_after += 1
+        
+        if solved_before == solved_after:
+            stalled = True
+            
         # Sanity check, return False if there is a box with zero available values:
         if len([box for box in values.keys() if len(values[box]) == 0]):
             return False
@@ -173,8 +183,9 @@ norm_grid = grid_values(norm_sudoku_grid)
 
 display(norm_grid)
 print('*************************************************************')
-elim1_dg = eliminate(norm_grid)
-display(elim1_dg)
-print('*************************************************************')
-oc_dg = only_choice(elim1_dg)
-display(oc_dg)
+display(reduce_puzzle(norm_grid))
+#elim1_dg = eliminate(norm_grid)
+#display(elim1_dg)
+#print('*************************************************************')
+#oc_dg = only_choice(elim1_dg)
+#display(oc_dg)

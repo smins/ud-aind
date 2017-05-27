@@ -86,22 +86,34 @@ def grid_values(grid):
 def display(values):
     """
     Display the values as a 2-D grid.
-    Args:
-        values(dict): The sudoku in dictionary form
+    Input: The sudoku in dictionary form
+    Output: None
     """
-    pass
+    # From project
+    width = 1+max(len(values[s]) for s in boxes)
+    line = '+'.join(['-'*(width*3)]*3)
+    for r in rows:
+        print(''.join(values[r+c].center(width)+('|' if c in '36' else '')
+                      for c in cols))
+        if r in 'CF': print(line)
+    return
         
 
 def eliminate(values):
-    # Get the list of all boxes with only 1 possible values
-    solved_values = [box for box in values.keys() if len(values[box]) == 1]
-    for box in solved_values:
-        # Grab the digit of each box
-        digit = values[box]
-        for peer in peers[box]:
-            values[peer] = values[peer].replace(digit,'')
-
+    """
+    Loop through all boxes - if a box has a value assigned, remove that 
+    value from all of its peers' possible values
+    """
+    for box in boxes:
+        if len(values[box]) == 1:
+            digit = values[box]
+            # Box has a placed value, so remove it from it's peers values
+            for peer in peers[box]:
+                stripped = values[peer].replace(digit,'')
+                assign_value(values, peer, stripped)
+                
     return values
+
 def only_choice(values):
     """
     Loop through all units - for every unit with a box that is the only 
@@ -124,7 +136,37 @@ def only_choice(values):
     return values
 
 def reduce_puzzle(values):
-    pass
+    """
+    While changes are still be applied (e.g. not stalled), iteratively 
+    run the elimination then only_choice strategies. 
+    
+    If a puzzle stalls, return false. Otherwise, return the solved puzzle
+    """
+    
+    stalled = False
+    while not stalled:
+        # Check how many boxes have a determined value
+        solved_before = 0
+        for box in values:
+            if len(values[box]) == 1:
+                solved_before += 1
+        # Your code here: Use the Eliminate Strategy
+        values = eliminate(values)
+        # Your code here: Use the Only Choice Strategy
+        values = only_choice(values)
+        # Check how many boxes have a determined value, to compare
+        solved_after = 0
+        for box in values:
+            if len(values[box]) == 1:
+                solved_after += 1
+        
+        if solved_before == solved_after:
+            stalled = True
+            
+        # Sanity check, return False if there is a box with zero available values:
+        if len([box for box in values.keys() if len(values[box]) == 0]):
+            return False
+    return values
 
 def search(values):
     pass
