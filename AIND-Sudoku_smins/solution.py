@@ -58,29 +58,27 @@ def naked_twins(values):
     """
     
     for unit in unitlist:
-        # Get all boxes of length 2
+        # Get all boxes with 2 possibilities
         twoboxes = {}
         for box in unit:
-            if len(values[box]) == 2:
-                twoboxes[box] = values[box]
-            
-        # Naked twins requires exactly two boxws
-        if len(twoboxes) != 2:
-            return values
-        
-        else:
-            # Naked twins case!
-            twovals = list(twoboxes.values())
-            if twovals[0] == twovals[1]:
-                
-                # TODO: Need to remove the values from ALL OTHER boxes in the units
+            curr_poss = values[box]
+            if len(curr_poss) == 2:
+                # Value has been found before
+                if curr_poss in twoboxes.keys():
+                    twoboxes[curr_poss] = [twoboxes[curr_poss], box]
+                else:
+                    twoboxes[curr_poss] = box
+
+        # Look at all list members (multiple boxes) with length two
+        for val in twoboxes:
+            boxes_with_val = twoboxes[val]
+            # Naked twins case! Exactly 2 boxes with the same 2 possibilities
+            if type(boxes_with_val) == list and len(boxes_with_val) == 2:
+                # Remove the values from ALL OTHER boxes in the units
                 for box in unit:
-                    stripped = values[box].strip(twovals[0])
-                    assign_value(values, box, stripped)
-            
-            # The boxes were not twins
-            else:
-                return values
+                    if box not in boxes_with_val:
+                        stripped = values[box].strip(val)
+                        assign_value(values, box, stripped)
                 
     return values
 
@@ -262,8 +260,9 @@ if __name__ == '__main__':
     display(solve(diag_sudoku_grid))
 
     try:
-        from visualize import visualize_assignments
-        visualize_assignments(assignments)
+        #from visualize import visualize_assignments
+        #visualize_assignments(assignments)
+        pass
 
     except SystemExit:
         pass
