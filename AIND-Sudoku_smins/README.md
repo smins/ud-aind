@@ -3,11 +3,29 @@
 
 # Question 1 (Naked Twins)
 Q: How do we use constraint propagation to solve the naked twins problem?  
-A: *Student should provide answer here*
+A: Constraint propagation is defined by Norvig and Russell as:
+
+"using the [search space] constraints to reduce the number of legal values 
+for a variable, which in turn can reduce the legal values for another variable..." 
+    
+We use constraint propagation in the Naked Twins technique by enforcing the
+rules of a special case - if exactly 2 boxes in a unit each have exactly the same
+two possible values, clearly no other boxes in the unit can have either of 
+these two values. By enforcing this constraint, we reduce the number of possible 
+values other boxes in the unit can have, and so on, which leads us closer to a
+solved puzzle.
 
 # Question 2 (Diagonal Sudoku)
 Q: How do we use constraint propagation to solve the diagonal sudoku problem?  
-A: *Student should provide answer here*
+A: We use constraint propagation to solve the diagonal sudoku problem by adding
+addition rules restricting the possible values that a box can have - that is,
+in addition to uniqueness in rows, columns, and grid-boxes, a box must now be
+unique across the prime diagonals as well.
+
+We add this new constraint into our solver logic by creating 2 new units and
+adding them to unitlist - this allows the existing functions eliminate() 
+and only_choice() to enforce the diagonal constraint the same way the other constraints
+(row-uniqueness, col-uniqueness, etc) are enforced.
 
 ### Install
 
