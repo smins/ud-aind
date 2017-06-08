@@ -56,30 +56,32 @@ def naked_twins(values):
     exactly 2 possible values, this is the naked twins. Remove those values
     from the other members of the unit.
     """
-    
+    # Find all twins candidates - boxes with only 2 possible values
+    # Key by possible values
     for unit in unitlist:
-        # Get all boxes with 2 possibilities
-        twoboxes = {}
+        twoposs = {}
         for box in unit:
             curr_poss = values[box]
             if len(curr_poss) == 2:
-                # Value has been found before
-                if curr_poss in twoboxes.keys():
-                    twoboxes[curr_poss] = [twoboxes[curr_poss], box]
+                if curr_poss in twoposs.keys():
+                    twoposs[curr_poss] = [twoposs[curr_poss], box]
                 else:
-                    twoboxes[curr_poss] = box
+                    twoposs[curr_poss] = box
 
-        # Look at all list members (multiple boxes) with length two
-        for val in twoboxes:
-            boxes_with_val = twoboxes[val]
+        # Look at all twins candidates in the unit
+        for val in twoposs:
+            valboxes = twoposs[val]
             # Naked twins case! Exactly 2 boxes with the same 2 possibilities
-            if type(boxes_with_val) == list and len(boxes_with_val) == 2:
-                # Remove the values from ALL OTHER boxes in the units
+            if type(valboxes) == list and len(valboxes) == 2:
+                # Remove the twin values from all SHARED PEERS of the twins
                 for box in unit:
-                    if box not in boxes_with_val:
-                        stripped = values[box].strip(val)
-                        assign_value(values, box, stripped)
-                
+                    if box not in valboxes:
+                        boxval = values[box]
+                        for digit in val:
+                            boxval = boxval.replace(digit, '')
+                        
+                        values = assign_value(values, box, boxval)
+            
     return values
 
 def grid_values(grid):
@@ -131,7 +133,7 @@ def eliminate(values):
             # Box has a placed value, so remove it from it's peers values
             for peer in peers[box]:
                 stripped = values[peer].replace(digit,'')
-                assign_value(values, peer, stripped)
+                values = assign_value(values, peer, stripped)
                 
     return values
 
@@ -152,7 +154,7 @@ def only_choice(values):
                     
             # Assign the current digit to its only possible space
             if len(contains_digit) == 1:
-                assign_value(values, contains_digit[0], digit)
+                values = assign_value(values, contains_digit[0], digit)
                 
     return values
 
