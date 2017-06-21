@@ -34,8 +34,16 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    raise NotImplementedError
+    # Improved score from sample_players.py
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    return float(own_moves - opp_moves)
 
 
 def custom_score_2(game, player):
@@ -212,8 +220,88 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        # Get the current player's legal moves
+        legal_moves = game.get_legal_moves()
+        
+        # No remaining legal moves - is this a forfeit?
+        if not legal_moves:
+            return (-1, -1)
+        
+        """
+        Begin the minimax calculation by calling min_value as the max player
+        Note the "1" while calling min_value - this is the first level searched
+        by the current player
+        """
+        # Discard the util value & keep the move part of the tuple
+        _, move = max([(self.min_value(game.forecast_move(m), 1), m) for m in legal_moves])
+        
+        return move
+    
+    def max_value(self, game, curr_depth):
+        """
+        Finds the move with the highest utility value for the current state by
+        traversing the entire game tree.
+        
+        Assumes the opponent is rational & playing to MINIMIZE utility
+        """
+        # To avoid timing out
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+                        
+        # Get the legal moves for the current player
+        legal_moves = game.get_legal_moves()
+            
+        # If max depth is this level or no legal moves remain, 
+        # return the utility of the current state
+        if curr_depth == self.search_depth or len(legal_moves) == 0:
+            return self.score(game, self)
+        
+        else:
+            # Assume that the current branch has the worst possible utility
+            # For MAX, this is the minimum value possible, -inf
+            util = float("-inf")
+            
+            # Find the move that returns the MAX utility AFTER 
+            # the opponent has moved. Increase the depth as we move down
+            util = max(util, 
+                       max([self.min_value(game.forecast_move(m), curr_depth+1) for m in legal_moves])
+                       )
+        
+        return util
+            
+    
+    def min_value(self, game, curr_depth):
+        """
+        Finds the move with the lowest utility value for the current state by
+        traversing the entire game tree.
+        
+        Assumes the opponent is rational & playing to MAXIMIZE utility
+        """
+        # To avoid timing out
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+            
+        # Get the legal moves for the current player
+        legal_moves = game.get_legal_moves()
+            
+        # If max depth is at this level or no legal moves remain, 
+        # return the utility of the current state
+        if curr_depth == self.search_depth or len(legal_moves) == 0:
+            return self.score(game, self)
+        
+        else:
+            # Assume that the current branch has the worst possible utility
+            # For MIN, this is the maximum value possible, +inf
+            util = float("inf")
+            
+            # Find the move that returns the MIN utility AFTER 
+            # the opponent has moved. Increase the depth as we move down
+            util = min(util, 
+                       min([self.max_value(game.forecast_move(m), curr_depth+1) for m in legal_moves])
+                       )
+        
+        return util
+            
 
 
 class AlphaBetaPlayer(IsolationPlayer):
