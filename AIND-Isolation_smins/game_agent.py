@@ -229,13 +229,15 @@ class MinimaxPlayer(IsolationPlayer):
         
         """
         Begin the minimax calculation by calling min_value as the max player
-        Note the "1" while calling min_value - this is the first level searched
-        by the current player
+        Note the "1" while calling min_value
+        Note best_move is intialized OOB by the constructor to (-1, -1)
+        We pass this because from the root, this is the first level searched
         """
         # Discard the util value & keep the move part of the tuple
         _, move = max([(self.min_value(game.forecast_move(m), 1), m) for m in legal_moves])
-        
+
         return move
+    
     
     def max_value(self, game, curr_depth):
         """
@@ -303,7 +305,6 @@ class MinimaxPlayer(IsolationPlayer):
         return util
             
 
-
 class AlphaBetaPlayer(IsolationPlayer):
     """Game-playing agent that chooses a move using iterative deepening minimax
     search with alpha-beta pruning. You must finish and test this player to
@@ -340,10 +341,23 @@ class AlphaBetaPlayer(IsolationPlayer):
             Board coordinates corresponding to a legal move; may return
             (-1, -1) if there are no available legal moves.
         """
+        # TODO - Implement iterative deepening
         self.time_left = time_left
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        # Initialize the best move so that this function returns something
+        # in case the search fails due to timeout
+        best_move = (-1, -1)
+
+        try:
+            # The try/except block will automatically catch the exception
+            # raised when the timer is about to expire.
+            return self.alphabeta(game, self.search_depth)
+
+        except SearchTimeout:
+            pass  # Handle any actions required after timeout as needed
+
+        # Return the best move from the last completed search iteration
+        return best_move
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
         """Implement depth-limited minimax search with alpha-beta pruning as
@@ -393,5 +407,126 @@ class AlphaBetaPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        # Get the current player's legal moves
+        legal_moves = game.get_legal_moves()
+        
+        # No remaining legal moves - is this a forfeit?
+        if not legal_moves:
+            return (-1, -1)
+        
+        """
+        Begin the alphabeta calculation by calling ab_max_value as the root
+        Note: Alpha and beta are initialized by the constructor to -inf/+inf
+        Note the "1" while calling ab_min_value
+        We pass this because from the root, this is the first level searched
+        """
+        # Initalize OOB / Worst Case
+        best_move = (-1, -1)
+        
+        # Examine every child of the root becase we need to see at least one
+        # leaf node of every subtree before pruning
+        for move in legal_moves:
+            util = self.ab_min_value(game.forecast_move(move), 1, alpha, beta)
+            
+            # New best-choice detected, update the lower bound
+            if util >= alpha:
+                best_move = move
+                alpha = util
+                
+        return best_move
+                
+        
+    def ab_max_value(self, game, curr_depth, alpha, beta):
+        """
+        Finds the move with the highest utility value for the current state by
+        traversing the entire game tree.
+        
+        Uses alpha-beta pruning to prune branches of the tree that do not 
+        need to be considered.
+        
+        Assumes the opponent is rational & playing to MINIMIZE utility
+        """
+        # To avoid timing out
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+                        
+        # Get the legal moves for the current player
+        legal_moves = game.get_legal_moves()
+            
+        # If max depth is this level or no legal moves remain, 
+        # return the utility of the current state
+        if curr_depth == self.search_depth or len(legal_moves) == 0:
+            return self.score(game, self)
+        
+        else:
+            # Assume that the current branch has the worst possible utility
+            # For MAX, this is the minimum value possible, -inf
+            util = float("-inf")
+            
+            # Looking at our legal moves, find one that returns the MAX utility of:
+                # 1) the worst case scenario
+                # 2) Our utility after MIN plays
+            for m in legal_moves:
+                util = max(
+                        util, 
+                        self.ab_min_value(game.forecast_move(m), curr_depth+1, alpha, beta)
+                           )
+            
+                # If we find a move that is better for MAX than our beta value 
+                # (MIN's best move seen during MAX's search), 
+                # prune the remaining moves & return immediately
+                if util >= beta:
+                    return util
+                
+                # Update alpha and continue
+                alpha = max(alpha, util)
+        
+        return util
+            
+    
+    def ab_min_value(self, game, curr_depth, alpha, beta):
+        """
+        Finds the move with the lowest utility value for the current state by
+        traversing the entire game tree.
+        
+        Uses alpha-beta pruning to prune branches of the tree that do not 
+        need to be considered.
+        
+        Assumes the opponent is rational & playing to MAXIMIZE utility
+        """
+        # To avoid timing out
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+            
+        # Get the legal moves for the current player
+        legal_moves = game.get_legal_moves()
+            
+        # If max depth is at this level or no legal moves remain, 
+        # return the utility of the current state
+        if curr_depth == self.search_depth or len(legal_moves) == 0:
+            return self.score(game, self)
+        
+        else:
+            # Assume that the current branch has the worst possible utility
+            # For MIN, this is the maximum value possible, +inf
+            util = float("inf")
+            
+            # Looking at our legal moves, find one that returns the MIN utility of:
+                # 1) the worst case scenario
+                # 2) Our utility after MAX plays
+            for m in legal_moves:
+                util = min(
+                        util, 
+                        self.ab_max_value(game.forecast_move(m), curr_depth+1, alpha, beta)
+                           )
+                
+                # If we find a move that is better for MIN than our alpha value 
+                # (MAX's best move seen during MIN's search), 
+                # prune the remaining moves & return immediately
+                if util <= alpha:
+                    return util
+                
+                # Update beta and continue
+                beta = min(beta, util)
+        
+        return util
