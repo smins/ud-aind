@@ -3,6 +3,7 @@ test your agent's strength against a set of known agents using tournament.py
 and include the results in your report.
 """
 import random
+import math
 
 
 class SearchTimeout(Exception):
@@ -34,16 +35,38 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # Improved score from sample_players.py
+    # Minimize the combined distance between the center of the other board
+    # The idea is to keep to the center, but do not let the other player wall
+    # you in - stay close enough to your opponent that he can't box you out, 
+    # but prefer moves that are farther from the corners to avoid traps
+    
+    # Check win/loss conditions
     if game.is_loser(player):
         return float("-inf")
 
     if game.is_winner(player):
         return float("inf")
 
-    own_moves = len(game.get_legal_moves(player))
-    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    return float(own_moves - opp_moves)
+    # Find the center of the board
+    center_width = game.width/2.0
+    center_height = game.height/2.0
+    
+    # Find the player's position
+    player_height, player_width = game.get_player_location(player)
+    
+    # Find the opponent's position
+    opp_height, opp_width = game.get_player_location(game.get_opponent(player))
+    
+    # Find the NEGATIVE Square Euclidean distance to the other player, as we want
+    # to prefer positions closer to our opponents
+    oppdist = -((opp_height - player_height)**2 + (opp_width - player_width)**2)
+    
+    # Find the NEGATIVE Square Euclidean Distance to the center of the board, 
+    # as we want to prefer positions closer to center
+    centdist = -((center_height - player_height)**2 + (center_width - player_width)**2)
+    
+    # Prefer center positions more
+    return float(oppdist + 1.75*centdist)
 
 
 def custom_score_2(game, player):
@@ -68,8 +91,32 @@ def custom_score_2(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    raise NotImplementedError
+    # Stay-centered heuristic - by avoiding the corners of the board, 
+    # we keep our options open & hopefully avoid being trapped.
+    # Minimize the Squared Euclidean distance between the player 
+    # & the center of the board, while still preferring moves that keep 
+    # open the most possible moves
+    
+    # Check win/loss conditions
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+    
+    # Find the center of the board
+    center_width, center_height = game.width/2.0, game.height/2.0
+    
+    # Find the player's position
+    player_height, player_width = game.get_player_location(player)
+    
+    # Get the number of open moves
+    moves = len(game.get_legal_moves(player))
+    
+    # Return the # of number of moves minus the Square Euclidean Distance to 
+    # the center of the board, as we want to prefer positions closer to center 
+    # but also prefer ones that leave open more moves
+    return float(moves-((center_height - player_height)**2 + (center_width - player_width)**2))
 
 
 def custom_score_3(game, player):
@@ -94,9 +141,17 @@ def custom_score_3(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    raise NotImplementedError
-
+    
+    # Focus on keeping our options open, but also seek to limit our opponents
+    # moves.
+    
+    # Get our total moves
+    own_moves = len(game.get_legal_moves(player))
+    # Get the opponents total moves
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    
+    # Prefer keeping our options open
+    return float(2*own_moves - opp_moves)
 
 class IsolationPlayer:
     """Base class for minimax and alphabeta agents -- this class is never
@@ -341,22 +396,26 @@ class AlphaBetaPlayer(IsolationPlayer):
             Board coordinates corresponding to a legal move; may return
             (-1, -1) if there are no available legal moves.
         """
-        # TODO - Implement iterative deepening
         self.time_left = time_left
 
         # Initialize the best move so that this function returns something
         # in case the search fails due to timeout
         best_move = (-1, -1)
+        
+        # Initialize depth and begin iterative deepening
+        depth = 1
 
-        try:
-            # The try/except block will automatically catch the exception
-            # raised when the timer is about to expire.
-            return self.alphabeta(game, self.search_depth)
+        while True:
+            try:
+                # Let alphabeta return, then increase the depth and re-search
+                best_move = self.alphabeta(game, depth)
+                depth += 1
 
-        except SearchTimeout:
-            pass  # Handle any actions required after timeout as needed
+            # Time's up, break the loop and return the best move
+            except SearchTimeout:
+                return best_move
 
-        # Return the best move from the last completed search iteration
+        # We searched the entire tree before time was up, so return
         return best_move
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
