@@ -116,7 +116,7 @@ def custom_score_2(game, player):
     # Return the # of number of moves minus the Square Euclidean Distance to 
     # the center of the board, as we want to prefer positions closer to center 
     # but also prefer ones that leave open more moves
-    return float(moves-((center_height - player_height)**2 + (center_width - player_width)**2))
+    return float(1.5*moves - ((abs(center_height - player_height)) + abs((center_width - player_width)**2)))
 
 
 def custom_score_3(game, player):
@@ -141,17 +141,45 @@ def custom_score_3(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
+    # Create a composite score that blends preferring the center, preferring
+    # moves with more descendants, and staying close to the opponent
     
-    # Focus on keeping our options open, but also seek to limit our opponents
-    # moves.
+    # Minimize the combined distance between the center of the other board
+    # The idea is to keep to the center, but do not let the other player wall
+    # you in - stay close enough to your opponent that he can't box you out.
+    # While doing this, prefer moves with more open possibilities.
     
-    # Get our total moves
-    own_moves = len(game.get_legal_moves(player))
-    # Get the opponents total moves
-    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    # Check win/loss conditions
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    # Find the center of the board
+    center_width = game.width/2.0
+    center_height = game.height/2.0
     
-    # Prefer keeping our options open
-    return float(2*own_moves - opp_moves)
+    # Find the player's position
+    player_height, player_width = game.get_player_location(player)
+    
+    # Find the opponent's position
+    opp_height, opp_width = game.get_player_location(game.get_opponent(player))
+    
+    # Find the NEGATIVE Square Euclidean distance to the other player, as we want
+    # to prefer positions closer to our opponents
+    opp_score = -((opp_height - player_height)**2 + (opp_width - player_width)**2)
+    
+    # Find the NEGATIVE Square Euclidean Distance to the center of the board, 
+    # as we want to prefer positions closer to center
+    center_score = -((center_height - player_height)**2 + (center_width - player_width)**2)
+    
+    # Find the number of open moves
+    move_score = len(game.get_legal_moves(player))
+    
+    # Combined
+    
+    return (1.5*move_score + 1.75*center_score + 0.7*opp_score)
 
 class IsolationPlayer:
     """Base class for minimax and alphabeta agents -- this class is never
