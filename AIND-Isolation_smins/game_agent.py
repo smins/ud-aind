@@ -35,112 +35,7 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # Minimize the combined distance between the center of the other board
-    # The idea is to keep to the center, but do not let the other player wall
-    # you in - stay close enough to your opponent that he can't box you out, 
-    # but prefer moves that are farther from the corners to avoid traps
     
-    # Check win/loss conditions
-    if game.is_loser(player):
-        return float("-inf")
-
-    if game.is_winner(player):
-        return float("inf")
-
-    # Find the center of the board
-    center_width = game.width/2.0
-    center_height = game.height/2.0
-    
-    # Find the player's position
-    player_height, player_width = game.get_player_location(player)
-    
-    # Find the opponent's position
-    opp_height, opp_width = game.get_player_location(game.get_opponent(player))
-    
-    # Find the NEGATIVE Square Euclidean distance to the other player, as we want
-    # to prefer positions closer to our opponents
-    oppdist = -((opp_height - player_height)**2 + (opp_width - player_width)**2)
-    
-    # Find the NEGATIVE Square Euclidean Distance to the center of the board, 
-    # as we want to prefer positions closer to center
-    centdist = -((center_height - player_height)**2 + (center_width - player_width)**2)
-    
-    # Prefer center positions more
-    return float(oppdist + 1.75*centdist)
-
-
-def custom_score_2(game, player):
-    """Calculate the heuristic value of a game state from the point of view
-    of the given player.
-
-    Note: this function should be called from within a Player instance as
-    `self.score()` -- you should not need to call this function directly.
-
-    Parameters
-    ----------
-    game : `isolation.Board`
-        An instance of `isolation.Board` encoding the current state of the
-        game (e.g., player locations and blocked cells).
-
-    player : object
-        A player instance in the current game (i.e., an object corresponding to
-        one of the player objects `game.__player_1__` or `game.__player_2__`.)
-
-    Returns
-    -------
-    float
-        The heuristic value of the current game state to the specified player.
-    """
-    # Stay-centered heuristic - by avoiding the corners of the board, 
-    # we keep our options open & hopefully avoid being trapped.
-    # Minimize the Squared Euclidean distance between the player 
-    # & the center of the board, while still preferring moves that keep 
-    # open the most possible moves
-    
-    # Check win/loss conditions
-    if game.is_loser(player):
-        return float("-inf")
-
-    if game.is_winner(player):
-        return float("inf")
-    
-    # Find the center of the board
-    center_width, center_height = game.width/2.0, game.height/2.0
-    
-    # Find the player's position
-    player_height, player_width = game.get_player_location(player)
-    
-    # Get the number of open moves
-    moves = len(game.get_legal_moves(player))
-    
-    # Return the # of number of moves minus the Square Euclidean Distance to 
-    # the center of the board, as we want to prefer positions closer to center 
-    # but also prefer ones that leave open more moves
-    return float(1.5*moves - ((abs(center_height - player_height)) + abs((center_width - player_width)**2)))
-
-
-def custom_score_3(game, player):
-    """Calculate the heuristic value of a game state from the point of view
-    of the given player.
-
-    Note: this function should be called from within a Player instance as
-    `self.score()` -- you should not need to call this function directly.
-
-    Parameters
-    ----------
-    game : `isolation.Board`
-        An instance of `isolation.Board` encoding the current state of the
-        game (e.g., player locations and blocked cells).
-
-    player : object
-        A player instance in the current game (i.e., an object corresponding to
-        one of the player objects `game.__player_1__` or `game.__player_2__`.)
-
-    Returns
-    -------
-    float
-        The heuristic value of the current game state to the specified player.
-    """
     # Create a composite score that blends preferring the center, preferring
     # moves with more descendants, and staying close to the opponent
     
@@ -180,6 +75,113 @@ def custom_score_3(game, player):
     # Combined
     
     return (1.5*move_score + 1.75*center_score + 0.7*opp_score)
+    
+def custom_score_2(game, player):
+    """Calculate the heuristic value of a game state from the point of view
+    of the given player.
+
+    Note: this function should be called from within a Player instance as
+    `self.score()` -- you should not need to call this function directly.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : object
+        A player instance in the current game (i.e., an object corresponding to
+        one of the player objects `game.__player_1__` or `game.__player_2__`.)
+
+    Returns
+    -------
+    float
+        The heuristic value of the current game state to the specified player.
+    """
+    
+    # Minimize the combined distance between the center of the other board
+    # The idea is to keep to the center, but do not let the other player wall
+    # you in - stay close enough to your opponent that he can't box you out, 
+    # but prefer moves that are farther from the corners to avoid traps
+    
+    # Check win/loss conditions
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    # Find the center of the board
+    center_width = game.width/2.0
+    center_height = game.height/2.0
+    
+    # Find the player's position
+    player_height, player_width = game.get_player_location(player)
+    
+    # Find the opponent's position
+    opp_height, opp_width = game.get_player_location(game.get_opponent(player))
+    
+    # Find the NEGATIVE Square Euclidean distance to the other player, as we want
+    # to prefer positions closer to our opponents
+    oppdist = -((opp_height - player_height)**2 + (opp_width - player_width)**2)
+    
+    # Find the NEGATIVE Square Euclidean Distance to the center of the board, 
+    # as we want to prefer positions closer to center
+    centdist = -((center_height - player_height)**2 + (center_width - player_width)**2)
+    
+    # Prefer center positions more
+    return float(oppdist + 1.75*centdist)
+
+def custom_score_3(game, player):
+    """Calculate the heuristic value of a game state from the point of view
+    of the given player.
+
+    Note: this function should be called from within a Player instance as
+    `self.score()` -- you should not need to call this function directly.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : object2
+        A player instance in the current game (i.e., an object corresponding to
+        one of the player objects `game.__player_1__` or `game.__player_2__`.)
+
+    Returns
+    -------
+    float
+        The heuristic value of the current game state to the specified player.
+    """
+    
+    # Open-centered heuristic - by avoiding the corners of the board, 
+    # we keep our options open & hopefully avoid being trapped.
+    # Minimize the Squared Euclidean distance between the player 
+    # & the center of the board, while still preferring moves that keep 
+    # open the most possible child moves
+    
+    # Check win/loss conditions
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+    
+    # Find the center of the board
+    center_width, center_height = game.width/2.0, game.height/2.0
+    
+    # Find the player's position
+    player_height, player_width = game.get_player_location(player)
+    
+    # Get the number of open moves
+    moves = len(game.get_legal_moves(player))
+    
+    # Return the # of number of moves minus the Square Euclidean Distance to 
+    # the center of the board, as we want to prefer positions closer to center 
+    # but also prefer ones that leave open more moves
+    return float(1.5*moves - ((abs(center_height - player_height)) + abs((center_width - player_width))))
+
 
 class IsolationPlayer:
     """Base class for minimax and alphabeta agents -- this class is never
