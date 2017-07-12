@@ -8,6 +8,7 @@
 
 from util import manhattanDistance
 from game import Grid
+import functools
 import os
 import random
 
@@ -35,7 +36,7 @@ class Layout:
     
   def initializeVisibilityMatrix(self):
     global VISIBILITY_MATRIX_CACHE
-    if reduce(str.__add__, self.layoutText) not in VISIBILITY_MATRIX_CACHE:
+    if functools.reduce(str.__add__, self.layoutText) not in VISIBILITY_MATRIX_CACHE:
       from game import Directions
       vecs = [(-0.5,0), (0.5,0),(0,-0.5),(0,0.5)]
       dirs = [Directions.NORTH, Directions.SOUTH, Directions.WEST, Directions.EAST]
@@ -50,9 +51,9 @@ class Layout:
                 vis[x][y][direction].add((nextx, nexty))
                 nextx, nexty = x + dx, y + dy
       self.visibility = vis      
-      VISIBILITY_MATRIX_CACHE[reduce(str.__add__, self.layoutText)] = vis
+      VISIBILITY_MATRIX_CACHE[functools.reduce(str.__add__, self.layoutText)] = vis
     else:
-      self.visibility = VISIBILITY_MATRIX_CACHE[reduce(str.__add__, self.layoutText)]
+      self.visibility = VISIBILITY_MATRIX_CACHE[functools.reduce(str.__add__, self.layoutText)]
       
   def isWall(self, pos):
     x, col = pos
